@@ -28,7 +28,7 @@ var greyVoxels [13362]Voxel
 type LinBuffer [13362][600]float32
 type MatBuffer [13362][13362]float32
 type LinStatEle struct {
-	avg float32
+	avg    float32
 	stddev float32
 }
 
@@ -38,10 +38,10 @@ func init() {
 	numWorkers = runtime.NumCPU()
 
 	for z := 0; z < 2; z++ {
-		for y := 0; y < 2; y ++ {
+		for y := 0; y < 2; y++ {
 			for x := 0; x < 2; x++ {
-				taxiDist := math.Abs(float64(x - 1)) + math.Abs(float64(y - 1))	+ math.Abs(float64(z - 1))
-				convKernel[z][y][x] = float32(math.Pow(2, -1 * taxiDist))
+				taxiDist := math.Abs(float64(x-1)) + math.Abs(float64(y-1)) + math.Abs(float64(z-1))
+				convKernel[z][y][x] = float32(math.Pow(2, -1*taxiDist))
 			}
 		}
 	}
@@ -93,36 +93,31 @@ func main() {
 
 	var linStat0 LinStat
 
+	var matBuf1 MatBuffer
+
+	for i := range matBuf1 {
+		for j := range matBuf1[i] {
+			matBuf1[i][j] = 0
+		}
+	}
+
 	for _, path := range fileList {
 		fmt.Printf("Processing: %s\n", path)
 
 		doSampling(path, &linBuf0)
-		fmt.Println("Sampling is done")
-		print(linBuf0[9233])
 
 		doZScoring(&linBuf0, &linBuf1)
-		fmt.Println("Z Scoring is done")
-		print(linBuf1[9233])
 
 		doSigmoid(&linBuf1, &linBuf0, &linStat0)
-		fmt.Println("Sigmoid is done")
-		print(linBuf0[9233])
 
 		doPearson(&linBuf0, &linStat0, &matBuf0)
-		fmt.Println("Pearson is done")
 
-		doSavePearsonHeatmap(path, &matBuf0)
-		fmt.Printf("Finished processing: %s\n", path)
+		doAccumulation(&matBuf0, &matBuf1)
 	}
+
+	doAverage(&matBuf1, float32(len(fileList)))
+
+	doWrite(&matBuf1)
 
 	return
 }
-
-func print(arr [600]float32) {
-	for _, val := range arr {
-		fmt.Println(val)
-	}
-
-	return
-}
-

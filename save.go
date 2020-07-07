@@ -12,7 +12,7 @@ import (
 
 func savePearsonHeatmap(matBuf0 *MatBuffer, img *image.RGBA, order <-chan int, wg *sync.WaitGroup) {
 	for {
-		row, ok := <- order
+		row, ok := <-order
 		if ok {
 			for col, val := range matBuf0[row] {
 				var red float64
@@ -21,11 +21,11 @@ func savePearsonHeatmap(matBuf0 *MatBuffer, img *image.RGBA, order <-chan int, w
 
 				if val >= 0 {
 					red = 255
-					green = math.Round(float64(1 - val) * 255)
-					blue = math.Round(float64(1 - val) * 255)
+					green = math.Round(float64(1-val) * 255)
+					blue = math.Round(float64(1-val) * 255)
 				} else {
-					red = math.Round(float64(1 + val) * 255)
-					green = math.Round(float64(1 + val) * 255)
+					red = math.Round(float64(1+val) * 255)
+					green = math.Round(float64(1+val) * 255)
 					blue = 255
 				}
 
@@ -48,7 +48,7 @@ func doSavePearsonHeatmap(path string, matBuf0 *MatBuffer) {
 
 	img := image.NewRGBA(image.Rectangle{upLeft, lowRight})
 
-	order := make (chan int, numWorkers)
+	order := make(chan int, numWorkers)
 
 	var wg sync.WaitGroup
 
@@ -69,6 +69,34 @@ func doSavePearsonHeatmap(path string, matBuf0 *MatBuffer) {
 	}
 	defer f.Close()
 	png.Encode(f, img)
+
+	return
+}
+
+func doWrite(matBuf1 *MatBuffer) {
+	f, err := os.Create("./result.csv")
+	defer f.Close()
+	if err != nil {
+		fmt.Println("Failed to write result!")
+		os.Exit(3)
+	}
+
+	for i := range matBuf1 {
+		txt := ""
+		for j := range matBuf1[i] {
+			ttxt := fmt.Sprintf("%f", matBuf1[i][j])
+			txt += ttxt
+			txt += ","
+		}
+		txt += "\n"
+
+		f.Write([]byte(txt))
+	}
+
+	err = f.Sync()
+	if err != nil {
+		fmt.Println("Failed to sync result to disk!")
+	}
 
 	return
 }
