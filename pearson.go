@@ -1,18 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"sync"
 )
 
 type pWork struct {
 	from int
-	to int
+	to   int
 }
 
 func pearson(linBuf0 *LinBuffer, linStat0 *LinStat, matBuf0 *MatBuffer, order <-chan int, wg *sync.WaitGroup) {
 	for {
-		work, ok := <- order
+		work, ok := <-order
 		if ok {
 			for i := work; i < 13362; i++ {
 				var accProd float32
@@ -26,14 +25,6 @@ func pearson(linBuf0 *LinBuffer, linStat0 *LinStat, matBuf0 *MatBuffer, order <-
 
 				matBuf0[work][i] = pearson
 				matBuf0[i][work] = pearson
-			}
-
-			if work == 9233 {
-				fmt.Printf("9233 avg: %f\n", linStat0[work].avg)
-				fmt.Printf("9233 std dev: %f\n", linStat0[work].stddev)
-				for _, val := range linBuf0[9233] {
-					fmt.Println(val)
-				}
 			}
 
 			wg.Done()

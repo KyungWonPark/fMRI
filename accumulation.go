@@ -7,7 +7,7 @@ func accumulation(matBuf0 *MatBuffer, matBuf1 *MatBuffer, order <-chan int, wg *
 		index, ok := <-order
 		if ok {
 			for i := range matBuf1[index] {
-				matBuf1[index][i] = matBuf1[index][i] + matBuf0[index][i]
+				matBuf1[index][i] += matBuf0[index][i]
 			}
 
 			wg.Done()
