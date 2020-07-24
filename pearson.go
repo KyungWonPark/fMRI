@@ -50,6 +50,6 @@ func doPearson(linBuf0 *LinBuffer, linStat0 *LinStat, matBuf0 *MatBuffer) {
 		order <- i
 	}
 	wg.Wait()
-
+	close(order)
 	return
 }

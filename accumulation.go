@@ -33,6 +33,6 @@ func doAccumulation(matBuf0 *MatBuffer, matBuf1 *MatBuffer) {
 		order <- i
 	}
 	wg.Wait()
-
+	close(order)
 	return
 }

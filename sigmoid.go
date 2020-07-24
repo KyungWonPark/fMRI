@@ -7,13 +7,13 @@ import (
 
 func sigmoid(linBuf1 *LinBuffer, linBuf0 *LinBuffer, linStat0 *LinStat, order <-chan int, wg *sync.WaitGroup) {
 	for {
-		index, ok := <- order
+		index, ok := <-order
 		if ok {
 			var valAcc float32
 			var sqrAcc float32
 
 			for i, value := range linBuf1[index] {
-				newVal := float32(2/(1 + math.Exp(-float64(value))) - 1)
+				newVal := float32(2/(1+math.Exp(-float64(value))) - 1)
 				valAcc += newVal
 				sqrAcc += newVal * newVal
 				linBuf0[index][i] = newVal
@@ -21,7 +21,7 @@ func sigmoid(linBuf1 *LinBuffer, linBuf0 *LinBuffer, linStat0 *LinStat, order <-
 
 			avgVal := valAcc / 600
 			avgSqr := sqrAcc / 600
-			stdDev := float32(math.Sqrt(float64(avgSqr) - float64(avgVal * avgVal)))
+			stdDev := float32(math.Sqrt(float64(avgSqr) - float64(avgVal*avgVal)))
 
 			linStat0[index] = LinStatEle{
 				avg:    avgVal,
@@ -51,6 +51,6 @@ func doSigmoid(linBuf1 *LinBuffer, linBuf0 *LinBuffer, linStat0 *LinStat) {
 		order <- i
 	}
 	wg.Wait()
-
+	close(order)
 	return
 }
