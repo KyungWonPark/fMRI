@@ -1,4 +1,4 @@
-module fmri
+module fMRI
 
 go 1.14
 
